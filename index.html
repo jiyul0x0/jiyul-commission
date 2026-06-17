@@ -194,7 +194,7 @@ html, body { width: 100%; background: #fff; font-family: 'Noto Sans KR', sans-se
       <div class="hero-badge">LIVE2D RIGGING ARTIST</div>
       <div class="hero-name">지율 커미션</div>
       <div class="hero-en">JIYUL COMMISSION</div>
-      <div class="hero-sub" id="hero-sub">Live2D 리깅 전문 작가<br>로딩 중...</div>
+      <div class="hero-sub" id="hero-sub">Live2D 리깅 작가<br>로딩 중...</div>
       <div class="hero-tags">
         <span class="tag"># Live2D</span>
         <span class="tag"># 리깅</span>
@@ -243,7 +243,7 @@ html, body { width: 100%; background: #fff; font-family: 'Noto Sans KR', sans-se
 
   <div class="section no-print" id="sec-sample">
     <div class="section-title">포트폴리오 · 샘플</div>
-    <div class="section-subtitle">작업물 샘플 — 문의 시 추가 포폴 공유 가능합니다</div>
+    <div class="section-subtitle">작업물 샘플 — 현재 샘플 모델 모집 중</div>
     <div class="sample-grid" id="sample-grid"></div>
   </div>
 
@@ -268,7 +268,7 @@ html, body { width: 100%; background: #fff; font-family: 'Noto Sans KR', sans-se
   <div class="footer-sec no-print">
     <div class="footer-name">지율 커미션 💚</div>
     <div class="footer-body">
-      Live2D 리깅 전문 작가<br>
+      Live2D 리깅 작가<br>
       문의는 아트머그 내 문의하기를 통해 남겨주세요<br>
       <span class="footer-warn">※ 모든 이미지는 저작권이 있는 이미지입니다. 무단 도용 및 복제를 금합니다.</span>
     </div>
@@ -305,7 +305,7 @@ onValue(ref(db, 'commission'), function(snapshot) {
   if (!d) return;
 
   // 1. 공지
-  document.getElementById('hero-sub').innerHTML = 'Live2D 리깅 전문 작가<br>문의 답변 시간 : ' + d.notice.answer_time;
+  document.getElementById('hero-sub').innerHTML = 'Live2D 리깅 작가<br>문의 답변 시간 : ' + d.notice.answer_time;
   document.getElementById('notice-subtitle').textContent = '문의 답변 시간 : ' + d.notice.answer_time;
   const ng = document.getElementById('notice-grid');
   ng.innerHTML = '';
