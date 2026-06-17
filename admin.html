@@ -75,7 +75,20 @@ textarea { resize: vertical; min-height: 80px; }
   </div>
 
   <div class="admin-section">
-    <div class="admin-section-title">💰 4. 가격표</div>
+    <div class="admin-section-title">🤝 4. 협업 작가</div>
+    <div class="field-row" style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+      <label style="margin:0;font-size:14px;">섹션 표시</label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;">
+        <input type="checkbox" id="collab-visible" style="width:18px;height:18px;cursor:pointer;" onchange="window.D.collab.visible=this.checked">
+        <span id="collab-visible-label" style="font-size:13px;color:#6aaa80;">ON / OFF</span>
+      </label>
+    </div>
+    <div id="collab-items"></div>
+    <button class="btn btn-green" onclick="addCollab()" style="margin-top:8px;">+ 작가 추가</button>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-section-title">💰 5. 가격표</div>
     <div id="price-items"></div>
     <button class="btn btn-green" onclick="addPrice()" style="margin-top:8px;">+ 항목 추가</button>
   </div>
@@ -157,7 +170,7 @@ window.renderAll = function() {
   document.getElementById('answer_time').value = d.notice.answer_time || '';
   document.getElementById('refund-intro').value = d.refund.intro || '';
   renderNotice(); renderStatus(); renderProcess();
-  renderPrice(); renderSample(); renderFaq(); renderRefund();
+  renderCollab(); renderPrice(); renderSample(); renderFaq(); renderRefund();
 };
 
 // Sortable 공통 초기화
@@ -211,6 +224,23 @@ function renderProcess() {
 }
 function addProcess() { window.D.process.push({title:'새 단계',body:'내용 입력'}); renderProcess(); }
 function removeProcess(i) { window.D.process.splice(i,1); renderProcess(); }
+
+function renderCollab() {
+  if (!window.D.collab) window.D.collab = { visible: false, items: [] };
+  var cb = document.getElementById('collab-visible');
+  if (cb) cb.checked = window.D.collab.visible;
+  var el = document.getElementById('collab-items'); el.innerHTML = '';
+  (window.D.collab.items||[]).forEach(function(c,i) {
+    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">&#9783;</span><span class="item-card-num">작가 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removeCollab('+i+')">삭제</button></div><div class="field-row"><label>이미지 URL</label><input type="text" value="'+(c.image||'')+'" placeholder="https://..." oninput="window.D.collab.items['+i+'].image=this.value"></div><div class="field-grid2"><div class="field-row"><label>작가명</label><input type="text" value="'+(c.name||'')+'" oninput="window.D.collab.items['+i+'].name=this.value"></div><div class="field-row"><label>메인 설명</label><input type="text" value="'+(c.main_desc||'')+'" oninput="window.D.collab.items['+i+'].main_desc=this.value"></div></div><div class="field-row"><label>서브 설명</label><input type="text" value="'+(c.sub_desc||'')+'" oninput="window.D.collab.items['+i+'].sub_desc=this.value"></div></div>';
+  });
+  initSortable('collab-items','collab','items',renderCollab);
+}
+function addCollab() {
+  if (!window.D.collab) window.D.collab = { visible: false, items: [] };
+  window.D.collab.items.push({image:'',name:'작가명',main_desc:'메인 설명',sub_desc:'서브 설명'});
+  renderCollab();
+}
+function removeCollab(i) { window.D.collab.items.splice(i,1); renderCollab(); }
 
 function renderPrice() {
   var el = document.getElementById('price-items'); el.innerHTML = '';
