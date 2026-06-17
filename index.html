@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>지율 커미션 — Live2D 리깅</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; background: #fff; font-family: 'Noto Sans KR', sans-serif; color: #0a1e0e; line-height: 1.6; overflow-x: hidden; }
+.page { width: 100%; background: #fff; }
+
+/* 히어로 */
+.hero { width: 100%; background: linear-gradient(150deg, #eef7ee 0%, #daeedc 50%, #eef6ee 100%); padding: 72px 0 56px; text-align: center; border-bottom: 2px solid #b8ddc0; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -80px; right: -80px; width: 320px; height: 320px; background: rgba(60,160,80,0.07); border-radius: 50%; }
+.hero::after  { content: ''; position: absolute; bottom: -60px; left: -60px; width: 240px; height: 240px; background: rgba(100,180,100,0.09); border-radius: 50%; }
+.hero-inner { position: relative; z-index: 1; }
+.hero-badge { display: inline-block; background: #3a9a60; color: #fff; font-size: 12px; font-weight: 700; letter-spacing: 3px; padding: 6px 20px; border-radius: 999px; margin-bottom: 22px; }
+.hero-name { font-family: 'Noto Serif KR', serif; font-size: 48px; font-weight: 700; color: #1a6a40; margin-bottom: 8px; letter-spacing: -1px; }
+.hero-en { font-size: 14px; color: #3a6a40; letter-spacing: 5px; margin-bottom: 20px; font-weight: 500; }
+.hero-sub { font-size: 15px; color: #3a6a40; line-height: 2.2; margin-bottom: 28px; }
+.hero-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.tag { background: rgba(58,154,96,0.1); color: #1a6a40; font-size: 13px; padding: 6px 18px; border-radius: 999px; border: 1px solid rgba(58,154,96,0.3); font-weight: 500; }
+
+/* 섹션 */
+.section { padding: 56px 80px; border-bottom: 1px solid #eef6ee; }
+.section-title { font-size: 20px; font-weight: 700; color: #1a6a40; margin-bottom: 6px; display: flex; align-items: center; gap: 12px; }
+.section-title::before { content: ''; display: inline-block; width: 5px; height: 22px; background: linear-gradient(180deg, #60c080, #3a9a60); border-radius: 3px; flex-shrink: 0; }
+.section-subtitle { font-size: 13px; color: #6aaa80; margin-bottom: 32px; padding-left: 17px; }
+
+/* 공지 */
+.notice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.notice-card { border: 1px solid #a8d4b0; border-radius: 14px; padding: 22px 20px; background: #f0f8f0; }
+.notice-card-title { font-size: 14px; font-weight: 700; color: #1a6a40; margin-bottom: 10px; }
+.notice-card-body { font-size: 13px; color: #4a7050; line-height: 1.9; word-break: keep-all; }
+.notice-card--warn { background: #fff5f5; border-color: #f0a0a0; }
+.notice-card--warn .notice-card-title { color: #c03030; }
+
+/* 예약현황 */
+.status-wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.status-item { border-radius: 14px; padding: 22px 16px; text-align: center; }
+.status-open   { background: #edf9f0; border: 1px solid #80cfa0; }
+.status-wait   { background: #fff8e0; border: 1px solid #f5c842; }
+.status-closed { background: #f5f5f5; border: 1px solid #ccc; }
+.status-dot { font-size: 22px; margin-bottom: 8px; }
+.status-label { font-size: 13px; font-weight: 700; }
+.status-open   .status-label { color: #1a7a40; }
+.status-wait   .status-label { color: #806000; }
+.status-closed .status-label { color: #555; }
+.status-desc { font-size: 12px; margin-top: 5px; }
+.status-open   .status-desc { color: #3a9a60; }
+.status-wait   .status-desc { color: #a07800; }
+.status-closed .status-desc { color: #888; }
+
+/* 진행방식 */
+.steps { display: flex; flex-direction: column; }
+.step { display: flex; gap: 22px; align-items: flex-start; padding: 24px 0; border-bottom: 1px solid #eef6ee; }
+.step:last-child { border-bottom: none; }
+.step-num { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #60c080, #2a8a50); color: #fff; font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 3px 10px rgba(42,138,80,0.2); }
+.step-content h4 { font-size: 16px; font-weight: 700; color: #1a6a40; margin-bottom: 6px; }
+.step-content p { font-size: 13px; color: #4a8060; line-height: 1.9; }
+
+/* 가격표 */
+.price-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.price-table thead th { background: #eef6ee; color: #1a6a40; padding: 13px 20px; text-align: left; font-weight: 700; font-size: 13px; border-bottom: 2px solid #a8d4b0; }
+.price-table thead th:last-child { text-align: right; }
+.price-table td { padding: 14px 20px; border-bottom: 1px solid #eef6ee; vertical-align: middle; }
+.price-table td:last-child { text-align: right; font-weight: 700; color: #3a9a60; white-space: nowrap; }
+.price-table tbody tr:hover td { background: #f5faf5; }
+.price-cat td { font-size: 12px; font-weight: 700; color: #6aaa80; background: #f0f8f0; letter-spacing: 1px; padding: 10px 20px; border-bottom: none; }
+.price-badge { display: inline-block; font-size: 11px; background: #d4eed8; color: #1a6a40; padding: 3px 10px; border-radius: 999px; margin-left: 8px; font-weight: 500; }
+.price-sub { font-size: 13px; color: #509060; }
+.price-note { font-size: 13px; color: #4a8060; margin-top: 20px; padding: 14px 20px; background: #f0f8f0; border-radius: 10px; border-left: 4px solid #80c090; line-height: 2; }
+
+/* 샘플 */
+.sample-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.sample-card { border-radius: 14px; border: 1px solid #a8d4b0; overflow: hidden; background: #f0f8f0; }
+.sample-video { position: relative; width: 100%; padding-top: 56.25%; }
+.sample-video iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+.sample-thumb { width: 100%; object-fit: cover; display: block; }
+.sample-thumb-empty { width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; background: #e8f4e8; color: #6aaa80; font-size: 13px; }
+.sample-title { padding: 12px 16px; font-size: 13px; font-weight: 700; color: #1a6a40; text-align: center; }
+
+/* 견적 양식 */
+.estimate-form { background: #f0f8f0; border-radius: 16px; border: 1px solid #a8d4b0; padding: 32px; }
+.form-field { margin-bottom: 20px; }
+.form-label { font-size: 14px; font-weight: 700; color: #1a6a40; margin-bottom: 8px; display: block; }
+.form-label .required { color: #e84040; margin-left: 4px; }
+.form-label .optional { font-size: 12px; font-weight: 400; color: #6aaa80; margin-left: 6px; }
+.form-input, .form-textarea, .form-number { width: 100%; padding: 12px 16px; border: 1px solid #a8d4b0; border-radius: 8px; font-size: 14px; font-family: 'Noto Sans KR', sans-serif; color: #0a1e0e; background: #fff; outline: none; transition: border-color 0.15s; }
+.form-input:focus, .form-textarea:focus, .form-number:focus { border-color: #3a9a60; }
+.form-textarea { height: 100px; resize: vertical; }
+.form-fixed { padding: 12px 16px; background: #e8f4e8; border-radius: 8px; font-size: 14px; color: #1a6a40; font-weight: 700; border: 1px solid #a8d4b0; }
+.form-actions { display: flex; gap: 12px; margin-top: 28px; }
+.btn { padding: 14px 28px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: 0; font-family: 'Noto Sans KR', sans-serif; transition: opacity 0.15s; }
+.btn:hover { opacity: 0.85; }
+.btn-primary { background: linear-gradient(135deg, #60c080, #2a8a50); color: #fff; flex: 1; }
+.btn-secondary { background: #fff; color: #1a6a40; border: 2px solid #3a9a60; }
+
+/* FAQ */
+.faq-list { display: flex; flex-direction: column; gap: 14px; }
+.faq-item { border: 1px solid #b0d8b8; border-radius: 12px; overflow: hidden; }
+.faq-q { display: flex; align-items: flex-start; gap: 12px; padding: 16px 18px; background: #f0f8f0; font-size: 14px; font-weight: 700; color: #1a6a40; }
+.faq-q-mark { width: 26px; height: 26px; border-radius: 50%; background: #3a9a60; color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.faq-a-mark { width: 26px; height: 26px; border-radius: 50%; background: #ddeedd; color: #3a9a60; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.faq-a { display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px; background: #fff; font-size: 13px; color: #4a7050; line-height: 1.9; border-top: 1px solid #ddeedd; word-break: keep-all; }
+
+/* 환불 */
+.refund-intro { font-size: 13px; color: #4a8060; line-height: 1.9; margin-bottom: 20px; padding: 14px 20px; background: #f0f8f0; border-radius: 10px; border-left: 4px solid #80c090; word-break: keep-all; }
+.refund-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.refund-table th { background: #eef6ee; color: #1a6a40; padding: 12px 20px; font-weight: 700; font-size: 13px; border-bottom: 2px solid #a8d4b0; text-align: center; }
+.refund-table td { padding: 13px 20px; border-bottom: 1px solid #eef6ee; text-align: center; }
+.refund-full    { color: #1a7a40; font-weight: 700; }
+.refund-partial { color: #806000; font-weight: 700; }
+.refund-none    { color: #c03030; font-weight: 700; }
+
+/* 푸터 */
+.footer-sec { background: linear-gradient(160deg, #eef7ee 0%, #daeedc 100%); padding: 48px 80px; text-align: center; border-top: 2px solid #b8ddc0; }
+.footer-name { font-family: 'Noto Serif KR', serif; font-size: 22px; font-weight: 700; color: #1a6a40; margin-bottom: 10px; }
+.footer-body { font-size: 13px; color: #4a8060; line-height: 2.2; }
+.footer-warn { display: inline-block; margin-top: 12px; font-size: 12px; color: #005030; }
+
+@media print {
+  .no-print { display: none !important; }
+  .section { padding: 20px 30px; }
+  .estimate-form { background: #fff; border: 1px solid #ccc; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="hero no-print">
+    <div class="hero-inner">
+      <div class="hero-badge">LIVE2D RIGGING ARTIST</div>
+      <div class="hero-name">지율 커미션</div>
+      <div class="hero-en">JIYUL COMMISSION</div>
+      <div class="hero-sub" id="hero-sub">Live2D 리깅 작가<br> 　</div>
+      <div class="hero-tags">
+        <span class="tag"># Live2D</span>
+        <span class="tag"># 리깅</span>
+        <span class="tag"># 가성비</span>
+        <span class="tag"># 기본 리깅</span>
+        <span class="tag"># 세팅 포함</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section no-print" id="sec-notice">
+    <div class="section-title">공지사항</div>
+    <div class="section-subtitle" id="notice-subtitle">로딩 중...</div>
+    <div class="notice-grid" id="notice-grid"></div>
+  </div>
+
+  <div class="section no-print" id="sec-status">
+    <div class="section-title">예약 현황</div>
+    <div class="section-subtitle">현재 작업 가능 여부를 확인하세요 · 수시로 변경될 수 있어요</div>
+    <div class="status-wrap" id="status-wrap"></div>
+  </div>
+
+  <div class="section no-print" id="sec-process">
+    <div class="section-title">진행 방식</div>
+    <div class="section-subtitle">주문 전 반드시 아래 순서를 확인해 주세요</div>
+    <div class="steps" id="steps"></div>
+  </div>
+
+  <div class="section no-print" id="sec-price">
+    <div class="section-title">가격표</div>
+    <div class="section-subtitle">복잡도에 따라 추가금 발생 가능 · 정확한 금액은 문의 후 안내</div>
+    <table class="price-table">
+      <thead><tr><th>작업 항목</th><th>포함 내용</th><th>가격</th></tr></thead>
+      <tbody id="price-tbody"></tbody>
+    </table>
+    <div class="price-note">💚 정확한 금액은 문의 주시면 견적서로 안내드립니다.<br><strong>작업 시작 후 환불 불가</strong>이므로 반드시 견적 확인 후 결제해 주세요!</div>
+  </div>
+
+  <div class="section no-print" id="sec-sample">
+    <div class="section-title">포트폴리오 · 샘플</div>
+    <div class="section-subtitle">작업물 샘플 — 문의 시 추가 포폴 공유 가능합니다</div>
+    <div class="sample-grid" id="sample-grid"></div>
+  </div>
+
+    </div>
+
+  <div class="section no-print" id="sec-faq">
+    <div class="section-title">자주 묻는 질문</div>
+    <div class="section-subtitle">FAQ — 문의 전 확인해 주세요</div>
+    <div class="faq-list" id="faq-list"></div>
+  </div>
+
+  <div class="section no-print" id="sec-refund">
+    <div class="section-title">환불 정책</div>
+    <div class="section-subtitle">작업 의뢰 전 필독해 주세요</div>
+    <div class="refund-intro" id="refund-intro"></div>
+    <table class="refund-table">
+      <thead><tr><th>작업 단계</th><th>환불 비율</th></tr></thead>
+      <tbody id="refund-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="footer-sec no-print">
+    <div class="footer-name">지율 커미션 💚</div>
+    <div class="footer-body">
+      Live2D 리깅 작가<br>
+      문의는 아트머그 내 문의하기를 통해 남겨주세요<br>
+      <span class="footer-warn">※ 모든 이미지는 저작권이 있는 이미지입니다. 무단 도용 및 복제를 금합니다.</span>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDJemQYxfZ-xNLM91I9kXe_KBW1KxSCpHQ",
+  authDomain: "jiyul-commission.firebaseapp.com",
+  databaseURL: "https://jiyul-commission-default-rtdb.firebaseio.com",
+  projectId: "jiyul-commission",
+  storageBucket: "jiyul-commission.firebasestorage.app",
+  messagingSenderId: "732523553497",
+  appId: "1:732523553497:web:e0d0ae68ed4619795f54c8"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const STATUS_ICONS = { open: '✅', wait: '⏳', closed: '🚫' };
+
+function getYoutubeId(url) {
+  if (!url) return null;
+  var m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+  return m ? m[1] : null;
+}
+
+onValue(ref(db, 'commission'), function(snapshot) {
+  const d = snapshot.val();
+  if (!d) return;
+
+  // 1. 공지
+  document.getElementById('hero-sub').innerHTML = 'Live2D 리깅 작가<br>문의 답변 시간 : ' + d.notice.answer_time;
+  document.getElementById('notice-subtitle').textContent = '문의 답변 시간 : ' + d.notice.answer_time;
+  const ng = document.getElementById('notice-grid');
+  ng.innerHTML = '';
+  (d.notice.items || []).forEach(n => {
+    const cls = n.type === 'warn' ? ' notice-card--warn' : '';
+    ng.innerHTML += `<div class="notice-card${cls}"><div class="notice-card-title">${n.icon} ${n.title}</div><div class="notice-card-body">${n.body.replace(/\n/g,'<br>')}</div></div>`;
+  });
+
+  // 2. 예약현황
+  const sw = document.getElementById('status-wrap');
+  sw.innerHTML = '';
+  (d.status || []).forEach(s => {
+    sw.innerHTML += `<div class="status-item status-${s.type}"><div class="status-dot">${STATUS_ICONS[s.type]||'✅'}</div><div class="status-label">${s.label}</div><div class="status-desc">${s.desc}</div></div>`;
+  });
+
+  // 3. 진행방식
+  const steps = document.getElementById('steps');
+  steps.innerHTML = '';
+  (d.process || []).forEach((p, i) => {
+    steps.innerHTML += `<div class="step"><div class="step-num">${i+1}</div><div class="step-content"><h4>${p.title}</h4><p>${p.body.replace(/\n/g,'<br>')}</p></div></div>`;
+  });
+
+  // 4. 가격표
+  const tb = document.getElementById('price-tbody');
+  tb.innerHTML = '';
+  let lastCat = '';
+  (d.price || []).forEach(p => {
+    if (p.category !== lastCat) {
+      tb.innerHTML += `<tr class="price-cat"><td colspan="3">${p.category}</td></tr>`;
+      lastCat = p.category;
+    }
+    const badge = p.badge ? `<span class="price-badge">${p.badge}</span>` : '';
+    tb.innerHTML += `<tr><td>${p.item}${badge}</td><td class="price-sub">${p.desc}</td><td>${p.price}</td></tr>`;
+  });
+
+  // 5. 샘플
+  const sg = document.getElementById('sample-grid');
+  sg.innerHTML = '';
+  (d.samples || []).forEach(s => {
+    const embedId = getYoutubeId(s.url);
+    let media = '';
+    if (embedId) {
+      media = `<div class="sample-video"><iframe src="https://www.youtube.com/embed/${embedId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+    } else if (s.thumb) {
+      media = `<img class="sample-thumb" src="${s.thumb}" alt="${s.title}">`;
+    } else {
+      media = `<div class="sample-thumb-empty">[ 샘플 URL을 입력해 주세요 ]</div>`;
+    }
+    sg.innerHTML += `<div class="sample-card">${media}<div class="sample-title">${s.title}</div></div>`;
+  });
+  // 6. FAQ
+  const fl = document.getElementById('faq-list');
+  fl.innerHTML = '';
+  (d.faq || []).forEach(f => {
+    fl.innerHTML += `<div class="faq-item"><div class="faq-q"><div class="faq-q-mark">Q</div>${f.question}</div><div class="faq-a"><div class="faq-a-mark">A</div>${f.answer}</div></div>`;
+  });
+
+  // 8. 환불
+  document.getElementById('refund-intro').innerHTML = d.refund.intro.replace(/\n/g,'<br>');
+  const rt = document.getElementById('refund-tbody');
+  rt.innerHTML = '';
+  (d.refund.rows || []).forEach(r => {
+    const cls = r.type === 'full' ? 'refund-full' : r.type === 'none' ? 'refund-none' : 'refund-partial';
+    rt.innerHTML += `<tr><td>${r.stage}</td><td class="${cls}">${r.rate}</td></tr>`;
+  });
+
+  // iframe 높이
+  window.parent.postMessage({ height: document.body.scrollHeight }, '*');
+});
+
+// iframe 스크롤
+window.addEventListener('message', e => {
+  if (e.data.scrollTo === 'top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  if (e.data.scrollTo) {
+    const el = document.getElementById(e.data.scrollTo);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+});
+</script>
+
+<script>
+function printEstimate() { window.print(); }
+function copyEstimate() {
+  var fields = window._estimateFields || [];
+  var lines = ['[ 지율 커미션 견적 양식 ]', ''];
+  fields.forEach(function(f) {
+    var val = f.type === 'fixed' ? f.value : (document.getElementById('field-' + f.id) || {}).value || '';
+    lines.push(f.label + ' : ' + (val || '(미입력)'));
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(function() {
+    alert('견적 내용이 복사됐어요! 문의 시 붙여넣어 주세요 💚');
+  });
+}
+</script>
+</body>
+</html>

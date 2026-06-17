@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>지율 커미션 — 관리자</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', sans-serif; background: #f4f8f4; color: #1a2a1a; min-height: 100vh; }
+.admin-wrap { max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; }
+.admin-header { background: linear-gradient(135deg, #3a9a60, #2a7a48); color: #fff; border-radius: 16px; padding: 28px 32px; margin-bottom: 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.admin-header h1 { font-size: 22px; font-weight: 700; }
+.admin-header p { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+.save-btn { background: #fff; color: #2a7a48; font-weight: 700; font-size: 14px; padding: 12px 24px; border-radius: 10px; border: 0; cursor: pointer; font-family: inherit; }
+.save-btn:hover { background: #eef6ee; }
+.save-btn:disabled { opacity: 0.5; cursor: default; }
+.admin-section { background: #fff; border-radius: 14px; border: 1px solid #d0e8d0; padding: 28px; margin-bottom: 20px; }
+.admin-section-title { font-size: 16px; font-weight: 700; color: #1a6a40; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #d0e8d0; }
+label { font-size: 13px; font-weight: 700; color: #2a4a2a; display: block; margin-bottom: 6px; }
+input[type=text], textarea, select { width: 100%; padding: 10px 14px; border: 1px solid #c0d8c0; border-radius: 8px; font-size: 14px; font-family: inherit; color: #1a2a1a; background: #fff; outline: none; transition: border-color 0.15s; }
+input:focus, textarea:focus, select:focus { border-color: #3a9a60; }
+textarea { resize: vertical; min-height: 80px; }
+.field-row { margin-bottom: 16px; }
+.field-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.btn { padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: 0; font-family: inherit; transition: opacity 0.15s; }
+.btn:hover { opacity: 0.8; }
+.btn-green { background: #3a9a60; color: #fff; }
+.btn-red { background: #e84040; color: #fff; }
+.item-card { background: #f4f8f4; border: 1px solid #c0d8c0; border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+.item-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.item-card-num { font-size: 12px; font-weight: 700; color: #6aaa80; background: #e0f0e0; padding: 3px 10px; border-radius: 999px; }
+.status-row { display: grid; grid-template-columns: auto 1fr 1fr auto auto; gap: 10px; align-items: center; background: #f4f8f4; border: 1px solid #c0d8c0; border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; }
+.toast { position: fixed; bottom: 30px; right: 30px; background: #3a9a60; color: #fff; padding: 14px 24px; border-radius: 10px; font-size: 14px; font-weight: 700; box-shadow: 0 4px 16px rgba(0,0,0,0.15); opacity: 0; transition: opacity 0.3s; z-index: 9999; pointer-events: none; }
+.toast.show { opacity: 1; }
+.drag-handle { cursor: grab; color: #aac8aa; font-size: 18px; padding: 0 8px; user-select: none; flex-shrink: 0; }
+.drag-handle:active { cursor: grabbing; }
+.item-card.sortable-ghost { opacity: 0.4; background: #d0f0d0; }
+.item-card.sortable-chosen { box-shadow: 0 4px 16px rgba(58,154,96,0.25); }
+.status-row.sortable-ghost { opacity: 0.4; }
+</style>
+</head>
+<body>
+<div class="admin-wrap">
+
+  <div class="admin-header">
+    <div>
+      <h1>🌿 지율 커미션 관리자</h1>
+      <p id="load-status">Firebase에서 데이터 불러오는 중...</p>
+    </div>
+    <button class="save-btn" id="save-btn" onclick="saveAll()" disabled>💾 저장 (즉시 반영)</button>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-section-title">📢 1. 공지사항</div>
+    <div class="field-row"><label>문의 답변 시간</label><input type="text" id="answer_time" placeholder="매일 오후 12시 ~ 오후 11시"></div>
+    <label style="margin-bottom:10px;">공지 카드</label>
+    <div id="notice-items"></div>
+    <button class="btn btn-green" onclick="addNotice()" style="margin-top:8px;">+ 공지 추가</button>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-section-title">📅 2. 예약 현황</div>
+    <div id="status-items"></div>
+    <button class="btn btn-green" onclick="addStatus()" style="margin-top:8px;">+ 항목 추가</button>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-section-title">⚙️ 3. 진행 방식</div>
+    <div id="process-items"></div>
+    <button class="btn btn-green" onclick="addProcess()" style="margin-top:8px;">+ 단계 추가</button>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-section-title">💰 4. 가격표</div>
+    <div id="price-items"></div>
+    <button class="btn btn-green" onclick="addPrice()" style="margin-top:8px;">+ 항목 추가</button>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-section-title">🖼️ 5. 샘플</div>
+    <div id="sample-items"></div>
+    <button class="btn btn-green" onclick="addSample()" style="margin-top:8px;">+ 샘플 추가</button>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-section-title">❓ 6. FAQ</div>
+    <div id="faq-items"></div>
+    <button class="btn btn-green" onclick="addFaq()" style="margin-top:8px;">+ Q&amp;A 추가</button>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-section-title">💳 7. 환불 정책</div>
+    <div class="field-row"><label>환불 정책 소개</label><textarea id="refund-intro"></textarea></div>
+    <label style="margin-bottom:10px;">환불 단계</label>
+    <div id="refund-items"></div>
+    <button class="btn btn-green" onclick="addRefund()" style="margin-top:8px;">+ 단계 추가</button>
+  </div>
+
+</div>
+<div class="toast" id="toast">✅ 저장됐어요! index 페이지에 바로 반영됩니다 💚</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDJemQYxfZ-xNLM91I9kXe_KBW1KxSCpHQ",
+  authDomain: "jiyul-commission.firebaseapp.com",
+  databaseURL: "https://jiyul-commission-default-rtdb.firebaseio.com",
+  projectId: "jiyul-commission",
+  storageBucket: "jiyul-commission.firebasestorage.app",
+  messagingSenderId: "732523553497",
+  appId: "1:732523553497:web:e0d0ae68ed4619795f54c8"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+onValue(ref(db, 'commission'), function(snapshot) {
+  const d = snapshot.val();
+  if (!d) {
+    document.getElementById('load-status').textContent = '데이터 없음 — init.html을 먼저 실행하세요';
+    return;
+  }
+  window.D = JSON.parse(JSON.stringify(d));
+  window.renderAll();
+  document.getElementById('load-status').textContent = '데이터 로드 완료 ✅';
+  document.getElementById('save-btn').disabled = false;
+}, { onlyOnce: true });
+
+window.saveAll = function() {
+  window.D.notice.answer_time = document.getElementById('answer_time').value;
+  window.D.refund.intro = document.getElementById('refund-intro').value;
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = '저장 중...';
+  set(ref(db, 'commission'), window.D)
+    .then(function() {
+      btn.disabled = false; btn.textContent = '💾 저장 (즉시 반영)';
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(function() { t.classList.remove('show'); }, 3000);
+    })
+    .catch(function(e) {
+      btn.disabled = false; btn.textContent = '💾 저장 (즉시 반영)';
+      alert('저장 실패: ' + e.message);
+    });
+};
+</script>
+
+<script>
+window.renderAll = function() {
+  var d = window.D;
+  document.getElementById('answer_time').value = d.notice.answer_time || '';
+  document.getElementById('refund-intro').value = d.refund.intro || '';
+  renderNotice(); renderStatus(); renderProcess();
+  renderPrice(); renderSample(); renderFaq(); renderRefund();
+};
+
+// Sortable 공통 초기화
+var _sortables = {};
+function initSortable(elId, dataKey, subKey, renderFn) {
+  if (_sortables[elId]) { try { _sortables[elId].destroy(); } catch(e){} }
+  var el = document.getElementById(elId);
+  if (!el) return;
+  _sortables[elId] = Sortable.create(el, {
+    handle: '.drag-handle',
+    animation: 150,
+    ghostClass: 'sortable-ghost',
+    chosenClass: 'sortable-chosen',
+    onEnd: function(evt) {
+      var arr = subKey ? window.D[dataKey][subKey] : window.D[dataKey];
+      var moved = arr.splice(evt.oldIndex, 1)[0];
+      arr.splice(evt.newIndex, 0, moved);
+      renderFn();
+    }
+  });
+}
+var H = '&#9783;';
+
+function renderNotice() {
+  var el = document.getElementById('notice-items'); el.innerHTML = '';
+  (window.D.notice.items||[]).forEach(function(n,i) {
+    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">공지 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removeNotice('+i+')">삭제</button></div><div class="field-grid2"><div class="field-row"><label>아이콘</label><input type="text" value="'+(n.icon||'')+'" oninput="window.D.notice.items['+i+'].icon=this.value"></div><div class="field-row"><label>타입</label><select onchange="window.D.notice.items['+i+'].type=this.value"><option value="normal"'+(n.type==="normal"?" selected":"")+'>일반</option><option value="warn"'+(n.type==="warn"?" selected":"")+'>경고(빨강)</option></select></div></div><div class="field-row"><label>제목</label><input type="text" value="'+(n.title||'')+'" oninput="window.D.notice.items['+i+'].title=this.value"></div><div class="field-row"><label>내용</label><textarea oninput="window.D.notice.items['+i+'].body=this.value">'+(n.body||'')+'</textarea></div></div>';
+  });
+  initSortable('notice-items','notice','items',renderNotice);
+}
+function addNotice() { window.D.notice.items.push({icon:'📌',title:'새 공지',body:'내용 입력',type:'normal'}); renderNotice(); }
+function removeNotice(i) { window.D.notice.items.splice(i,1); renderNotice(); }
+
+function renderStatus() {
+  var el = document.getElementById('status-items'); el.innerHTML = '';
+  (window.D.status||[]).forEach(function(s,i) {
+    var opts = ['open','wait','closed'].map(function(t){ return '<option value="'+t+'"'+(s.type===t?' selected':'')+'>'+{open:'접수중',wait:'대기중',closed:'마감'}[t]+'</option>'; }).join('');
+    el.innerHTML += '<div class="status-row"><span class="drag-handle">'+H+'</span><input type="text" value="'+(s.label||'')+'" placeholder="항목명" oninput="window.D.status['+i+'].label=this.value"><input type="text" value="'+(s.desc||'')+'" placeholder="설명" oninput="window.D.status['+i+'].desc=this.value"><select onchange="window.D.status['+i+'].type=this.value">'+opts+'</select><button class="btn btn-red" onclick="removeStatus('+i+')">삭제</button></div>';
+  });
+  initSortable('status-items','status',null,renderStatus);
+}
+function addStatus() { window.D.status.push({label:'새 항목',type:'open',desc:'설명'}); renderStatus(); }
+function removeStatus(i) { window.D.status.splice(i,1); renderStatus(); }
+
+function renderProcess() {
+  var el = document.getElementById('process-items'); el.innerHTML = '';
+  (window.D.process||[]).forEach(function(p,i) {
+    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">단계 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removeProcess('+i+')">삭제</button></div><div class="field-row"><label>제목</label><input type="text" value="'+(p.title||'')+'" oninput="window.D.process['+i+'].title=this.value"></div><div class="field-row"><label>내용</label><textarea oninput="window.D.process['+i+'].body=this.value">'+(p.body||'')+'</textarea></div></div>';
+  });
+  initSortable('process-items','process',null,renderProcess);
+}
+function addProcess() { window.D.process.push({title:'새 단계',body:'내용 입력'}); renderProcess(); }
+function removeProcess(i) { window.D.process.splice(i,1); renderProcess(); }
+
+function renderPrice() {
+  var el = document.getElementById('price-items'); el.innerHTML = '';
+  (window.D.price||[]).forEach(function(p,i) {
+    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">항목 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removePrice('+i+')">삭제</button></div><div class="field-grid2"><div class="field-row"><label>카테고리</label><input type="text" value="'+(p.category||'')+'" oninput="window.D.price['+i+'].category=this.value"></div><div class="field-row"><label>배지</label><input type="text" value="'+(p.badge||'')+'" oninput="window.D.price['+i+'].badge=this.value"></div></div><div class="field-grid2"><div class="field-row"><label>항목명</label><input type="text" value="'+(p.item||'')+'" oninput="window.D.price['+i+'].item=this.value"></div><div class="field-row"><label>가격</label><input type="text" value="'+(p.price||'')+'" oninput="window.D.price['+i+'].price=this.value"></div></div><div class="field-row"><label>설명</label><input type="text" value="'+(p.desc||'')+'" oninput="window.D.price['+i+'].desc=this.value"></div></div>';
+  });
+  initSortable('price-items','price',null,renderPrice);
+}
+function addPrice() { window.D.price.push({category:'카테고리',item:'항목명',badge:'',desc:'설명',price:'협의'}); renderPrice(); }
+function removePrice(i) { window.D.price.splice(i,1); renderPrice(); }
+
+function renderSample() {
+  var el = document.getElementById('sample-items'); el.innerHTML = '';
+  (window.D.samples||[]).forEach(function(s,i) {
+    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">샘플 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removeSample('+i+')">삭제</button></div><div class="field-row"><label>제목</label><input type="text" value="'+(s.title||'')+'" oninput="window.D.samples['+i+'].title=this.value"></div><div class="field-row"><label>유튜브 URL</label><input type="text" value="'+(s.url||'')+'" placeholder="https://youtu.be/xxxxx" oninput="window.D.samples['+i+'].url=this.value"></div><div class="field-row"><label>썸네일 URL (선택)</label><input type="text" value="'+(s.thumb||'')+'" placeholder="https://..." oninput="window.D.samples['+i+'].thumb=this.value"></div></div>';
+  });
+  initSortable('sample-items','samples',null,renderSample);
+}
+function addSample() { window.D.samples.push({title:'새 샘플',url:'',thumb:''}); renderSample(); }
+function removeSample(i) { window.D.samples.splice(i,1); renderSample(); }
+
+function renderFaq() {
+  var el = document.getElementById('faq-items'); el.innerHTML = '';
+  (window.D.faq||[]).forEach(function(f,i) {
+    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">Q'+(i+1)+'</span></span><button class="btn btn-red" onclick="removeFaq('+i+')">삭제</button></div><div class="field-row"><label>질문</label><input type="text" value="'+(f.question||'')+'" oninput="window.D.faq['+i+'].question=this.value"></div><div class="field-row"><label>답변</label><textarea oninput="window.D.faq['+i+'].answer=this.value">'+(f.answer||'')+'</textarea></div></div>';
+  });
+  initSortable('faq-items','faq',null,renderFaq);
+}
+function addFaq() { window.D.faq.push({question:'질문 입력',answer:'답변 입력'}); renderFaq(); }
+function removeFaq(i) { window.D.faq.splice(i,1); renderFaq(); }
+
+function renderRefund() {
+  var el = document.getElementById('refund-items'); el.innerHTML = '';
+  (window.D.refund.rows||[]).forEach(function(r,i) {
+    var types = ['full','partial','none'].map(function(t){ return '<option value="'+t+'"'+(r.type===t?' selected':'')+'>'+{full:'전액환불',partial:'부분환불',none:'환불불가'}[t]+'</option>'; }).join('');
+    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">단계 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removeRefund('+i+')">삭제</button></div><div class="field-grid3"><div class="field-row"><label>작업 단계</label><input type="text" value="'+(r.stage||'')+'" oninput="window.D.refund.rows['+i+'].stage=this.value"></div><div class="field-row"><label>환불 비율</label><input type="text" value="'+(r.rate||'')+'" oninput="window.D.refund.rows['+i+'].rate=this.value"></div><div class="field-row"><label>타입</label><select onchange="window.D.refund.rows['+i+'].type=this.value">'+types+'</select></div></div></div>';
+  });
+  initSortable('refund-items','refund','rows',renderRefund);
+}
+function addRefund() { window.D.refund.rows.push({stage:'단계명',rate:'환불 비율',type:'partial'}); renderRefund(); }
+function removeRefund(i) { window.D.refund.rows.splice(i,1); renderRefund(); }
+</script>
+</body>
+</html>
