@@ -61,6 +61,16 @@ html, body { width: 100%; background: #fff; font-family: 'Noto Sans KR', sans-se
 .step-content h4 { font-size: 16px; font-weight: 700; color: #1a6a40; margin-bottom: 6px; }
 .step-content p { font-size: 13px; color: #4a8060; line-height: 1.9; }
 
+/* 협업작가 */
+.collab-grid { display: flex; flex-direction: column; gap: 20px; }
+.collab-card { display: flex; gap: 24px; align-items: center; background: #f0f8f0; border: 1px solid #a8d4b0; border-radius: 14px; padding: 24px; }
+.collab-img { width: 100px; height: 100px; min-width: 100px; border-radius: 12px; object-fit: cover; background: #e0f0e0; display: block; }
+.collab-img-empty { width: 100px; height: 100px; min-width: 100px; border-radius: 12px; background: #e0f0e0; display: flex; align-items: center; justify-content: center; color: #6aaa80; font-size: 12px; }
+.collab-info { flex: 1; }
+.collab-name { font-size: 16px; font-weight: 700; color: #1a6a40; margin-bottom: 4px; }
+.collab-main { font-size: 14px; color: #4a7050; margin-bottom: 6px; }
+.collab-sub { font-size: 13px; color: #6aaa80; line-height: 1.7; }
+
 /* 가격표 */
 .price-table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .price-table thead th { background: #eef6ee; color: #1a6a40; padding: 13px 20px; text-align: left; font-weight: 700; font-size: 13px; border-bottom: 2px solid #a8d4b0; }
@@ -136,11 +146,11 @@ html, body { width: 100%; background: #fff; font-family: 'Noto Sans KR', sans-se
       <div class="hero-badge">LIVE2D RIGGING ARTIST</div>
       <div class="hero-name">지율 커미션</div>
       <div class="hero-en">JIYUL COMMISSION</div>
-      <div class="hero-sub" id="hero-sub">Live2D 리깅 작가<br> 　</div>
+      <div class="hero-sub" id="hero-sub">Live2D 리깅 작가<br>로딩 중...</div>
       <div class="hero-tags">
         <span class="tag"># Live2D</span>
         <span class="tag"># 리깅</span>
-        <span class="tag"># 가성비</span>
+        <span class="tag"># VTube Studio</span>
         <span class="tag"># 기본 리깅</span>
         <span class="tag"># 세팅 포함</span>
       </div>
@@ -165,6 +175,12 @@ html, body { width: 100%; background: #fff; font-family: 'Noto Sans KR', sans-se
     <div class="steps" id="steps"></div>
   </div>
 
+  <div class="section no-print" id="sec-collab" style="display:none;">
+    <div class="section-title">협업 작가</div>
+    <div class="section-subtitle">함께 작업하는 일러스트 작가님들을 소개해요</div>
+    <div class="collab-grid" id="collab-grid"></div>
+  </div>
+
   <div class="section no-print" id="sec-price">
     <div class="section-title">가격표</div>
     <div class="section-subtitle">복잡도에 따라 추가금 발생 가능 · 정확한 금액은 문의 후 안내</div>
@@ -177,7 +193,7 @@ html, body { width: 100%; background: #fff; font-family: 'Noto Sans KR', sans-se
 
   <div class="section no-print" id="sec-sample">
     <div class="section-title">포트폴리오 · 샘플</div>
-    <div class="section-subtitle">작업물 샘플 — 현재 샘플 작업 모집 중</div>
+    <div class="section-subtitle">작업물 샘플 — 현재 샘플 모집 중입니다.</div>
     <div class="sample-grid" id="sample-grid"></div>
   </div>
 
@@ -290,6 +306,20 @@ onValue(ref(db, 'commission'), function(snapshot) {
     }
     sg.innerHTML += `<div class="sample-card">${media}<div class="sample-title">${s.title}</div></div>`;
   });
+  // 5-1. 협업작가
+  const collabSec = document.getElementById('sec-collab');
+  if (d.collab) {
+    collabSec.style.display = d.collab.visible ? '' : 'none';
+    const cg = document.getElementById('collab-grid');
+    cg.innerHTML = '';
+    (d.collab.items || []).forEach(c => {
+      const img = c.image
+        ? `<img class="collab-img" src="${c.image}" alt="${c.name}">`
+        : `<div class="collab-img-empty">이미지</div>`;
+      cg.innerHTML += `<div class="collab-card">${img}<div class="collab-info"><div class="collab-name">${c.name}</div><div class="collab-main">${c.main_desc}</div><div class="collab-sub">${c.sub_desc}</div></div></div>`;
+    });
+  }
+
   // 6. FAQ
   const fl = document.getElementById('faq-list');
   fl.innerHTML = '';
