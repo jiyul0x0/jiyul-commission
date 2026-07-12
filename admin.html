@@ -232,14 +232,30 @@ function renderCollab() {
   if (cb) cb.checked = !!window.D.collab.visible;
   var el = document.getElementById('collab-items'); el.innerHTML = '';
   window.D.collab.items.forEach(function(c,i) {
-    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">&#9783;</span><span class="item-card-num">작가 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removeCollab('+i+')">삭제</button></div><div class="field-row"><label>이미지 URL</label><input type="text" value="'+(c.image||'')+'" placeholder="https://..." oninput="window.D.collab.items['+i+'].image=this.value"></div><div class="field-grid2"><div class="field-row"><label>작가명</label><input type="text" value="'+(c.name||'')+'" oninput="window.D.collab.items['+i+'].name=this.value"></div><div class="field-row"><label>메인 설명</label><input type="text" value="'+(c.main_desc||'')+'" oninput="window.D.collab.items['+i+'].main_desc=this.value"></div></div><div class="field-row"><label>서브 설명</label><input type="text" value="'+(c.sub_desc||'')+'" oninput="window.D.collab.items['+i+'].sub_desc=this.value"></div></div>';
+    el.innerHTML +=
+      '<div class="item-card">' +
+        '<div class="item-card-header">' +
+          '<span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">&#9783;</span><span class="item-card-num">작가 '+(i+1)+'</span></span>' +
+          '<button class="btn btn-red" onclick="removeCollab('+i+')">삭제</button>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<label>이미지 URL</label>' +
+          '<input type="text" value="'+(c.image||'')+'" placeholder="https://..." oninput="window.D.collab.items['+i+'].image=this.value">' +
+        '</div>' +
+        '<div class="field-grid2">' +
+          '<div class="field-row"><label>작가명</label><input type="text" value="'+(c.name||'')+'" oninput="window.D.collab.items['+i+'].name=this.value"></div>' +
+          '<div class="field-row"><label>작가 사이트 URL</label><input type="text" value="'+(c.link||'')+'" placeholder="https://..." oninput="window.D.collab.items['+i+'].link=this.value"></div>' +
+        '</div>' +
+        '<div class="field-row"><label>협업 혜택</label><input type="text" value="'+(c.main_desc||'')+'" oninput="window.D.collab.items['+i+'].main_desc=this.value"></div>' +
+        '<div class="field-row"><label>설명</label><input type="text" value="'+(c.sub_desc||'')+'" oninput="window.D.collab.items['+i+'].sub_desc=this.value"></div>' +
+      '</div>';
   });
   initSortable('collab-items','collab','items',renderCollab);
 }
 function addCollab() {
   if (!window.D.collab) window.D.collab = { visible: false, items: [] };
   if (!window.D.collab.items) window.D.collab.items = [];
-  window.D.collab.items.push({image:'',name:'작가명',main_desc:'메인 설명',sub_desc:'서브 설명'});
+  window.D.collab.items.push({image:'',name:'작가명',link:'',main_desc:'협업 혜택',sub_desc:'설명'});
   renderCollab();
 }
 function removeCollab(i) {
