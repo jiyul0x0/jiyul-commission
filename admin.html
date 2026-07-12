@@ -232,6 +232,9 @@ function renderCollab() {
   if (cb) cb.checked = !!window.D.collab.visible;
   var el = document.getElementById('collab-items'); el.innerHTML = '';
   window.D.collab.items.forEach(function(c,i) {
+    var isUpload = c.image && c.image.startsWith('data:');
+    var imgMode = isUpload ? 'upload' : 'url';
+    var preview = c.image ? '<img src="'+c.image+'" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:1px solid #c0d8c0;margin-top:8px;">' : '';
     el.innerHTML +=
       '<div class="item-card">' +
         '<div class="item-card-header">' +
@@ -239,8 +242,18 @@ function renderCollab() {
           '<button class="btn btn-red" onclick="removeCollab('+i+')">삭제</button>' +
         '</div>' +
         '<div class="field-row">' +
-          '<label>이미지 URL</label>' +
-          '<input type="text" value="'+(c.image||'')+'" placeholder="https://..." oninput="window.D.collab.items['+i+'].image=this.value">' +
+          '<label>이미지</label>' +
+          '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
+            '<button type="button" onclick="setCollabImgMode('+i+',\'url\')" style="padding:5px 12px;border-radius:6px;border:1px solid #c0d8c0;font-size:12px;cursor:pointer;background:'+(imgMode==='url'?'#3a9a60':'#fff')+';color:'+(imgMode==='url'?'#fff':'#3a9a60')+';">URL 입력</button>' +
+            '<button type="button" onclick="setCollabImgMode('+i+',\'upload\')" style="padding:5px 12px;border-radius:6px;border:1px solid #c0d8c0;font-size:12px;cursor:pointer;background:'+(imgMode==='upload'?'#3a9a60':'#fff')+';color:'+(imgMode==='upload'?'#fff':'#3a9a60')+';">직접 업로드</button>' +
+          '</div>' +
+          '<div id="collab-img-url-'+i+'" style="display:'+(imgMode==='url'?'block':'none')+'">' +
+            '<input type="text" value="'+(imgMode==='url'?c.image||'':'')+'" placeholder="https://..." oninput="window.D.collab.items['+i+'].image=this.value">' +
+          '</div>' +
+          '<div id="collab-img-upload-'+i+'" style="display:'+(imgMode==='upload'?'block':'none')+'">' +
+            '<input type="file" accept="image/*" style="font-size:13px;" onchange="uploadCollabImg(this,'+i+')">' +
+            preview +
+          '</div>' +
         '</div>' +
         '<div class="field-grid2">' +
           '<div class="field-row"><label>작가명</label><input type="text" value="'+(c.name||'')+'" oninput="window.D.collab.items['+i+'].name=this.value"></div>' +
@@ -251,6 +264,27 @@ function renderCollab() {
       '</div>';
   });
   initSortable('collab-items','collab','items',renderCollab);
+}
+function setCollabImgMode(i, mode) {
+  // 모드 전환 시 이미지 초기화
+  window.D.collab.items[i].image = '';
+  renderCollab();
+  // 전환 후 해당 모드 영역 표시
+  var urlEl = document.getElementById('collab-img-url-'+i);
+  var uploadEl = document.getElementById('collab-img-upload-'+i);
+  if (urlEl) urlEl.style.display = mode === 'url' ? 'block' : 'none';
+  if (uploadEl) uploadEl.style.display = mode === 'upload' ? 'block' : 'none';
+}
+function uploadCollabImg(input, i) {
+  var file = input.files[0];
+  if (!file) return;
+  if (file.size > 1024 * 1024) { alert('이미지가 너무 커요! 1MB 이하로 줄여주세요.'); input.value=''; return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    window.D.collab.items[i].image = e.target.result;
+    renderCollab();
+  };
+  reader.readAsDataURL(file);
 }
 function addCollab() {
   if (!window.D.collab) window.D.collab = { visible: false, items: [] };
